@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>For My Ghazal</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blush: #f7d6d0;
+  --rose: #e8a5a0;
+  --petal: #f9e8e5;
+  --deep: #c97b7b;
+  --text: #5a3a3a;
+  --soft: #8c5c5c;
+  --white: #fffaf9;
+  --accent: #f2c4c0;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--petal);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.petals-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.petal {
+  position: absolute; width: 10px; height: 10px;
+  background: var(--rose); border-radius: 50% 0 50% 0;
+  opacity: 0; animation: fall linear infinite;
+}
+@keyframes fall {
+  0%   { transform: translateY(-20px) rotate(0deg);   opacity: 0.6; }
+  100% { transform: translateY(110vh) rotate(360deg); opacity: 0;   }
+}
+.screen {
+  display: none; position: relative; z-index: 1;
+  min-height: 100vh; padding: 40px 24px;
+  max-width: 480px; margin: 0 auto;
+  flex-direction: column; align-items: center; justify-content: center;
+}
+.screen.active { display: flex; }
+.intro-tag {
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--deep);
+  opacity: 0; animation: fadeUp 0.6s 0.2s forwards;
+}
+.intro-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(52px,14vw,72px); font-weight: 300; font-style: italic;
+  color: var(--text); line-height: 1; margin: 12px 0 4px;
+  opacity: 0; animation: fadeUp 0.7s 0.4s forwards;
+}
+.intro-name span { color: var(--deep); }
+.intro-sub {
+  font-family: 'Cormorant Garamond', serif; font-size: 17px; font-style: italic;
+  color: var(--soft); text-align: center; line-height: 1.6; margin-bottom: 32px;
+  opacity: 0; animation: fadeUp 0.7s 0.6s forwards;
+}
+.letter-card {
+  background: var(--white); border-radius: 20px; padding: 28px 24px; width: 100%;
+  box-shadow: 0 8px 40px rgba(201,123,123,0.12); margin-bottom: 28px;
+  opacity: 0; animation: fadeUp 0.7s 0.8s forwards;
+}
+.letter-card p {
+  font-family: 'Cormorant Garamond', serif; font-size: 18px; font-style: italic;
+  line-height: 1.8; color: var(--text); margin-bottom: 12px;
+}
+.letter-card .sig {
+  font-family: 'Cormorant Garamond', serif; font-size: 15px;
+  color: var(--deep); text-align: right; font-style: italic;
+}
+.btn {
+  background: var(--deep); color: white; border: none;
+  padding: 16px 40px; border-radius: 50px;
+  font-family: 'DM Sans', sans-serif; font-size: 14px; letter-spacing: 1px; cursor: pointer;
+  transition: all 0.3s; opacity: 0; animation: fadeUp 0.7s 1s forwards;
+}
+.btn:hover { background: var(--soft); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(201,123,123,0.3); }
+.btn.no-anim { opacity: 1; animation: none; }
+.progress-wrap { width: 100%; margin-bottom: 24px; }
+.progress-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--deep); margin-bottom: 8px; }
+.progress-bar { height: 4px; background: var(--accent); border-radius: 2px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--deep); border-radius: 2px; transition: width 0.5s ease; }
+.q-card {
+  background: var(--white); border-radius: 24px; padding: 32px 24px; width: 100%;
+  box-shadow: 0 8px 40px rgba(201,123,123,0.12); margin-bottom: 20px;
+}
+.q-num { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--rose); margin-bottom: 12px; }
+.q-text {
+  font-family: 'Cormorant Garamond', serif; font-size: 22px;
+  font-weight: 400; line-height: 1.4; color: var(--text); margin-bottom: 24px;
+}
+.options { display: flex; flex-direction: column; gap: 10px; }
+.opt {
+  background: var(--petal); border: 1.5px solid var(--accent); border-radius: 14px;
+  padding: 14px 18px; font-family: 'DM Sans', sans-serif; font-size: 14px;
+  color: var(--text); cursor: pointer; transition: all 0.25s; text-align: left;
+}
+.opt:hover:not(:disabled) { background: var(--blush); border-color: var(--deep); transform: translateX(4px); }
+.opt.correct { background: #d4edda; border-color: #7dbf8f; color: #2d6a4f; }
+.opt.wrong   { background: #fde0e0; border-color: var(--rose); color: #a04040; }
+.opt:disabled { cursor: default; }
+.feedback {
+  font-family: 'Cormorant Garamond', serif; font-size: 16px; font-style: italic;
+  color: var(--soft); min-height: 24px; margin-top: 8px; text-align: center;
+}
+.result-emoji { font-size: 64px; margin-bottom: 12px; animation: bounce 0.6s ease; }
+@keyframes bounce { 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.2) } }
+.result-title {
+  font-family: 'Cormorant Garamond', serif; font-size: 36px; font-style: italic;
+  color: var(--text); text-align: center; margin-bottom: 8px;
+}
+.result-score { font-size: 13px; color: var(--soft); letter-spacing: 1px; margin-bottom: 20px; }
+.result-msg {
+  background: var(--white); border-radius: 20px; padding: 24px; width: 100%;
+  box-shadow: 0 8px 40px rgba(201,123,123,0.12);
+  font-family: 'Cormorant Garamond', serif; font-size: 18px; font-style: italic;
+  line-height: 1.8; color: var(--text); text-align: center; margin-bottom: 28px;
+}
+.divider {
+  display: flex; align-items: center; gap: 10px;
+  color: var(--rose); font-size: 13px; margin: 12px 0; width: 100%;
+}
+.divider::before, .divider::after { content:''; flex:1; height:1px; background: var(--accent); }
+.hearts { position: fixed; bottom: 24px; right: 24px; font-size: 20px; animation: pulse 2s infinite; z-index: 10; }
+@keyframes pulse { 0%,100%{ transform:scale(1) } 50%{ transform:scale(1.15) } }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
+</head>
+<body>
+
+<div class="petals-bg" id="petalsBg"></div>
+<div class="hearts">&#x1F338;</div>
+
+<div class="screen active" id="s-intro">
+  <div class="intro-tag">a little something for</div>
+  <div class="intro-name">Yash<span>fa</span></div>
+  <div class="intro-sub">my ghazal, my mohtarma, my lady &#x1F338;</div>
+  <div class="letter-card">
+    <p>Yashu,</p>
+    <p>I made this little thing for you. Not because I had to, but because I wanted you to know that even when I run out of words, I still find a hundred ways to reach you.</p>
+    <p>This is a small quiz about me. Let us see how well you know the person who refuses to stop calling you ghazal.</p>
+    <p>No pressure. No right way to feel. Just play. &#x1F338;</p>
+    <div class="sig">-- yours, always</div>
+  </div>
+  <button class="btn" id="startBtn">Let's play &#x1F338;</button>
+</div>
+
+<div class="screen" id="s-quiz">
+  <div class="progress-wrap">
+    <div class="progress-label">Question <span id="qNum">1</span> of 7</div>
+    <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+  </div>
+  <div class="q-card">
+    <div class="q-num" id="qLabel">Q1</div>
+    <div class="q-text" id="qText"></div>
+    <div class="options" id="qOptions"></div>
+  </div>
+  <div class="feedback" id="feedback"></div>
+</div>
+
+<div class="screen" id="s-result">
+  <div class="result-emoji" id="resultEmoji">&#x1F338;</div>
+  <div class="result-title" id="resultTitle"></div>
+  <div class="result-score" id="resultScore"></div>
+  <div class="divider">&#x1F338;</div>
+  <div class="result-msg" id="resultMsg"></div>
+  <button class="btn no-anim" id="restartBtn">Play again? &#x1F338;</button>
+</div>
+
+<script>
+(function() {
+  var questions = [
+    {
+      q: "When offered food he does not like, what does he do?",
+      opts: ["Complains loudly", "Eats it without much fuss", "Refuses and asks for something else", "Pretends to eat it"],
+      ans: 1,
+      right: "Yes -- he will eat whatever you put in front of him. Not picky at all.",
+      wrong: "He actually just eats it. Food does not bother him much."
+    },
+    {
+      q: "Which habit of his have you definitely noticed by now?",
+      opts: [
+        "Overthinking everything at 2am",
+        "Saying he is gonna be left behind the moment things feel too good",
+        "Disappearing mid-conversation",
+        "Being overly formal when nervous"
+      ],
+      ans: 1,
+      right: "You know him too well. It is a reflex. He cannot help it.",
+      wrong: "It is the leaving fear. He says it more than he should."
+    },
+    {
+      q: "What is his actual dream in life?",
+      opts: [
+        "A big career and success",
+        "Travel the whole world",
+        "Disappear into the mountains and live quietly -- just peace and silence",
+        "Find love and settle down"
+      ],
+      ans: 2,
+      right: "Yes. Mountains, silence, peace. That is the whole dream.",
+      wrong: "His dream is much quieter. Mountains, silence, a peaceful life away from everything."
+    },
+    {
+      q: "What is his deepest fear?",
+      opts: [
+        "Being alone forever",
+        "Never being enough -- never being the first choice no matter how hard he tries",
+        "Losing people he loves suddenly",
+        "Failing at everything he attempts"
+      ],
+      ans: 1,
+      right: "You really do know him. That fear lives very close to the surface.",
+      wrong: "It is the fear of never being enough. Of being useless no matter how hard he tries. Of never being chosen first."
+    },
+    {
+      q: "What kind of songs does he listen to most?",
+      opts: [
+        "Loud energetic songs",
+        "Whatever is trending",
+        "Your favorites, or songs that remind him of you",
+        "Old classic songs only"
+      ],
+      ans: 2,
+      right: "Your favorites became his. That is just how it is.",
+      wrong: "He listens to your favorites. Or songs that bring him back to you. Always."
+    },
+    {
+      q: "What happens when you try to introduce him to Hifza?",
+      opts: [
+        "He gets excited and agrees immediately",
+        "He pretends he did not hear",
+        "He acts unbothered but secretly panics",
+        "He says you will leave him for her and spirals a little"
+      ],
+      ans: 3,
+      right: "See? You know exactly what happens. He cannot help it.",
+      wrong: "He spirals. Every time. The leaving fear kicks in instantly."
+    },
+    {
+      q: "If he could send you one thing right now, what would it be?",
+      opts: [
+        "A long voice note",
+        "This quiz, just to say he is thinking of you",
+        "Silence, because he does not know how to say it",
+        "All of the above, honestly"
+      ],
+      ans: 3,
+      right: "All of it. All of it at once. That is the truest answer.",
+      wrong: "All of the above. Always all of it at once."
+    }
+  ];
+
+  var current = 0;
+  var score = 0;
+  var answered = false;
+
+  function showScreen(id) {
+    var all = document.querySelectorAll('.screen');
+    for (var i = 0; i < all.length; i++) {
+      all[i].classList.remove('active');
+      all[i].style.display = 'none';
+    }
+    var el = document.getElementById(id);
+    el.style.display = 'flex';
+    el.classList.add('active');
+    window.scrollTo(0, 0);
+  }
+
+  function renderQuestion() {
+    answered = false;
+    var q = questions[current];
+    document.getElementById('qNum').textContent = current + 1;
+    document.getElementById('qLabel').textContent = 'Q' + (current + 1);
+    document.getElementById('qText').textContent = q.q;
+    document.getElementById('feedback').textContent = '';
+    document.getElementById('progFill').style.width = Math.round((current / questions.length) * 100) + '%';
+
+    var container = document.getElementById('qOptions');
+    container.innerHTML = '';
+    for (var i = 0; i < q.opts.length; i++) {
+      var btn = document.createElement('button');
+      btn.className = 'opt';
+      btn.textContent = q.opts[i];
+      btn.setAttribute('data-idx', i);
+      btn.addEventListener('click', handleAnswer);
+      container.appendChild(btn);
+    }
+  }
+
+  function handleAnswer() {
+    if (answered) return;
+    answered = true;
+    var idx = parseInt(this.getAttribute('data-idx'), 10);
+    var q = questions[current];
+    var btns = document.querySelectorAll('.opt');
+    for (var i = 0; i < btns.length; i++) { btns[i].disabled = true; }
+
+    if (idx === q.ans) {
+      btns[idx].classList.add('correct');
+      score++;
+      document.getElementById('feedback').textContent = q.right;
+    } else {
+      btns[idx].classList.add('wrong');
+      btns[q.ans].classList.add('correct');
+      document.getElementById('feedback').textContent = q.wrong;
+    }
+
+    setTimeout(function() {
+      current++;
+      if (current < questions.length) {
+        renderQuestion();
+      } else {
+        showResult();
+      }
+    }, 2200);
+  }
+
+  function showResult() {
+    document.getElementById('progFill').style.width = '100%';
+    var pct = score / questions.length;
+    var emoji, title, msg;
+
+    if (pct === 1) {
+      emoji = '\uD83C\uDF38';
+      title = 'You know him completely.';
+      msg = score + ' out of 7 -- perfect. He does not know whether to feel seen or embarrassed. Probably both. You pay attention to him in ways he does not even notice himself. Thank you for that, Yashu. Really.';
+    } else if (pct >= 0.71) {
+      emoji = '\uD83E\uDD7A';
+      title = 'You know him well, ghazal.';
+      msg = score + ' out of 7. You notice things he barely says out loud. He hopes you know that matters to him more than he will ever say properly. Mohtarma knows her person. \uD83C\uDF38';
+    } else if (pct >= 0.43) {
+      emoji = '\uD83D\uDC8C';
+      title = 'You are learning him.';
+      msg = score + ' out of 7. Not bad, not perfect. But that is okay. Half the fun is figuring each other out slowly. He is still learning you too. There is time. \uD83C\uDF38';
+    } else {
+      emoji = '\uD83C\uDF37';
+      title = 'Still more to discover.';
+      msg = score + ' out of 7. Looks like there is a lot left to learn. That is not a bad thing at all. It just means more conversations, more late nights, more of this. He is not complaining. \uD83C\uDF38';
+    }
+
+    document.getElementById('resultEmoji').textContent = emoji;
+    document.getElementById('resultTitle').textContent = title;
+    document.getElementById('resultScore').textContent = score + ' / ' + questions.length + ' correct';
+    document.getElementById('resultMsg').textContent = msg;
+    showScreen('s-result');
+  }
+
+  document.getElementById('startBtn').addEventListener('click', function() {
+    current = 0; score = 0; answered = false;
+    renderQuestion();
+    showScreen('s-quiz');
+  });
+
+  document.getElementById('restartBtn').addEventListener('click', function() {
+    current = 0; score = 0; answered = false;
+    renderQuestion();
+    showScreen('s-quiz');
+  });
+
+  // floating petals
+  var bg = document.getElementById('petalsBg');
+  for (var i = 0; i < 18; i++) {
+    var p = document.createElement('div');
+    p.className = 'petal';
+    p.style.left = (Math.random() * 100) + 'vw';
+    var size = (6 + Math.random() * 8) + 'px';
+    p.style.width = size;
+    p.style.height = size;
+    p.style.animationDuration = (6 + Math.random() * 8) + 's';
+    p.style.animationDelay = (Math.random() * 8) + 's';
+    bg.appendChild(p);
+  }
+})();
+</script>
+</body>
+</html>
